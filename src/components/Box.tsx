@@ -1,50 +1,58 @@
 import React, { Component } from "react";
-import Vector2D from "../models/Vector2D";
 import "./Box.css";
+import Vector2D from "../models/Vector2D";
 
 interface IProps {
-  Min: Vector2D;
-  Max: Vector2D;
-  Name: string;
+  Target?: boolean;
 }
 
 interface IState {
-  _Min: Vector2D;
-  _Max: Vector2D;
-  _IsValid: boolean;
+  Name: string;
+  Min: Vector2D;
+  Max: Vector2D;
+  Width: number;
+  Height: number;
+  IsMouseDown: boolean;
+  ShiftX: number;
+  ShiftY: number;
 }
 
 class Box extends Component<IProps, IState> {
+  static defaultProps: IProps = {
+    Target: false
+  };
+
   constructor(props: IProps) {
     super(props);
-
-    const InitValidity = this.GetBoxValidity(props.Min, props.Max);
-
     this.state = {
-      _Min: props.Min,
-      _Max: props.Max,
-      _IsValid: InitValidity
+      Name: "A",
+      Width: 100,
+      Height: 100,
+      Min: Vector2D.ZeroVector,
+      Max: new Vector2D(100, 100),
+      IsMouseDown: false,
+      ShiftX: 0,
+      ShiftY: 0
     };
-  }
 
-  componentDidUpdate(prevProps: IProps) {
-    if (
-      !prevProps.Max.IsEqual(this.props.Max) ||
-      !prevProps.Min.IsEqual(this.props.Min)
-    ) {
-      this.setState((prevState, props) => ({
-        ...prevState,
-        _IsValid: this.GetBoxValidity(props.Min, props.Max)
-      }));
-    }
+    this.OnMouseDown = this.OnMouseDown.bind(this);
+    this.OnMouseUp = this.OnMouseUp.bind(this);
+    this.OnMouseMove = this.OnMouseMove.bind(this);
+    this.OnMouseLeave = this.OnMouseLeave.bind(this);
   }
 
   render() {
-    const { _IsValid } = this.state;
-    const { Name } = this.props;
-
+    const { Name, Width, Height, Min } = this.state;
+    const { Target } = this.props;
     return (
-      <div className="box">
+      <div
+        data-testid="container-box"
+        className={`box ${Target ? "target" : ""}`}
+        style={{ width: Width, height: Height, top: Min.Y, left: Min.X }}
+        onMouseDown={this.OnMouseDown}
+        onMouseUp={this.OnMouseUp}
+        onMouseMove={this.OnMouseMove}
+      >
         <div className="resizers">
           <div className="resizer top-left" />
           <div className="resizer top-right" />
@@ -52,16 +60,51 @@ class Box extends Component<IProps, IState> {
           <div className="resizer bottom-right" />
         </div>
         <div className="name">{Name}</div>
-        {!_IsValid && <div className="validity-message">Invalid!</div>}
+        <div
+          className="draggable-area"
+          onMouseDown={this.OnMouseDown}
+          onMouseUp={this.OnMouseUp}
+          onMouseMove={this.OnMouseMove}
+          onMouseLeave={this.OnMouseLeave}
+        />
       </div>
     );
   }
 
-  /**
-   * Checks if Min and Max points are valid.
-   */
-  private GetBoxValidity(Min: Vector2D, Max: Vector2D): boolean {
-    return Min.X < Max.X && Min.Y < Max.Y;
+  OnMouseDown(event: React.MouseEvent) {
+    const { Min } = this.state;
+    const MouseShiftX = event.clientX - Min.X;
+    const MouseShiftY = event.clientY - Min.Y;
+
+    this.setState({
+      IsMouseDown: true,
+      ShiftX: MouseShiftX,
+      ShiftY: MouseShiftY
+    });
+  }
+
+  OnMouseUp() {
+    this.setState({
+      IsMouseDown: false
+    });
+  }
+
+  OnMouseLeave() {
+    this.setState({
+      IsMouseDown: false
+    });
+  }
+
+  OnMouseMove(event: React.MouseEvent) {
+    const { IsMouseDown, ShiftX, ShiftY } = this.state;
+    if (IsMouseDown) {
+      const MouseX = event.clientX - ShiftX;
+      const MouseY = event.clientY - ShiftY;
+
+      this.setState({
+        Min: new Vector2D(MouseX, MouseY)
+      });
+    }
   }
 }
 
