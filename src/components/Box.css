@@ -13,6 +13,7 @@
   left: 50%;
   transform: translate(-50%, -50%);
   z-index: 1;
+  user-select: none;
 }
 
 .draggable-area:hover {
@@ -80,4 +81,5 @@
   bottom: 0%;
   left: 50%;
   transform: translate(-50%, -50%);
+  user-select: none;
 }

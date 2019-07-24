@@ -49,17 +49,7 @@ class Box extends Component<IProps, IState> {
         data-testid="container-box"
         className={`box ${Target ? "target" : ""}`}
         style={{ width: Width, height: Height, top: Min.Y, left: Min.X }}
-        onMouseDown={this.OnMouseDown}
-        onMouseUp={this.OnMouseUp}
-        onMouseMove={this.OnMouseMove}
       >
-        <div className="resizers">
-          <div className="resizer top-left" />
-          <div className="resizer top-right" />
-          <div className="resizer bottom-left" />
-          <div className="resizer bottom-right" />
-        </div>
-        <div className="name">{Name}</div>
         <div
           className="draggable-area"
           onMouseDown={this.OnMouseDown}
@@ -67,14 +57,21 @@ class Box extends Component<IProps, IState> {
           onMouseMove={this.OnMouseMove}
           onMouseLeave={this.OnMouseLeave}
         />
+        <div className="resizers">
+          <div className="resizer top-left" />
+          <div className="resizer top-right" />
+          <div className="resizer bottom-left" />
+          <div className="resizer bottom-right" />
+        </div>
+        <div className="name">{Name}</div>
       </div>
     );
   }
 
   OnMouseDown(event: React.MouseEvent) {
     const { Min } = this.state;
-    const MouseShiftX = event.clientX - Min.X;
-    const MouseShiftY = event.clientY - Min.Y;
+    const MouseShiftX = event.pageX - Min.X;
+    const MouseShiftY = event.pageY - Min.Y;
 
     this.setState({
       IsMouseDown: true,
@@ -98,8 +95,8 @@ class Box extends Component<IProps, IState> {
   OnMouseMove(event: React.MouseEvent) {
     const { IsMouseDown, ShiftX, ShiftY } = this.state;
     if (IsMouseDown) {
-      const MouseX = event.clientX - ShiftX;
-      const MouseY = event.clientY - ShiftY;
+      const MouseX = event.pageX - ShiftX;
+      const MouseY = event.pageY - ShiftY;
 
       this.setState({
         Min: new Vector2D(MouseX, MouseY)
