@@ -10,7 +10,7 @@ class Viewport extends Component<{}, IState> {
   constructor(props: {}) {
     super(props);
     this.state = {
-      Mouse: new Vector2D(0, 0)
+      Mouse: Vector2D.ZeroVector
     };
 
     this.OnMouseMove = this.OnMouseMove.bind(this);
@@ -28,8 +28,8 @@ class Viewport extends Component<{}, IState> {
     const { Mouse } = this.state;
     return (
       <div style={{ position: "absolute", width: "100vw", height: "100vh" }}>
-        <Box Target Mouse={Mouse} />
-        <Box Target Mouse={Mouse} />
+        <Box Name="A" Mouse={Mouse} />
+        <Box Name="B" Mouse={Mouse} DistanceFromCameraView={10} />
       </div>
     );
   }

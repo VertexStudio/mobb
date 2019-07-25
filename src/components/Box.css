@@ -2,22 +2,17 @@
   display: inline-block;
   position: relative;
   background-color: #00586e8a;
-  cursor: pointer;
+  cursor: grab;
 }
 
 .draggable-area {
-  width: 94%;
+  width: 99%;
   position: absolute;
-  height: 94%;
+  height: 99%;
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  z-index: 1;
   user-select: none;
-}
-
-.draggable-area:hover {
-  background-color: #00000062;
 }
 
 .box.target {
@@ -39,7 +34,6 @@
   background: white;
   border: 3px solid #4286f4;
   position: absolute;
-  z-index: 10;
 }
 
 .box .resizers .resizer.top-left {
