@@ -57,6 +57,7 @@ class Box extends Component<IProps, IState> {
     const { ActiveResizer } = this.state;
     if (!prevProps.Mouse.IsEqual(this.props.Mouse)) {
       this.OnBoxMouseMove();
+      this.OnResizerMouseMove(ActiveResizer);
     }
   }
 
@@ -64,39 +65,41 @@ class Box extends Component<IProps, IState> {
     const { Name, Width, Height, Min } = this.state;
     const { Target } = this.props;
     return (
-      <div
-        data-testid="container-box"
-        className={`box ${Target ? "target" : ""}`}
-        style={{ width: Width, height: Height, left: Min.X, top: Min.Y }}
-      >
+      <div style={{ position: "absolute", width: "100vw", height: "100vh" }}>
         <div
-          className="draggable-area"
-          onMouseDown={this.OnBoxMouseDown}
-          onMouseUp={this.OnBoxMouseUp}
-        />
-        <div className="resizers">
+          data-testid="container-box"
+          className={`box ${Target ? "target" : ""}`}
+          style={{ width: Width, height: Height, left: Min.X, top: Min.Y }}
+        >
           <div
-            className="resizer top-left"
-            onMouseDown={this.OnResizerMouseDown(E_ResizerType.TOP_LEFT)}
-            onMouseUp={this.OnResizerMouseUp}
+            className="draggable-area"
+            onMouseDown={this.OnBoxMouseDown}
+            onMouseUp={this.OnBoxMouseUp}
           />
-          <div
-            className="resizer top-right"
-            onMouseDown={this.OnResizerMouseDown(E_ResizerType.TOP_RIGHT)}
-            onMouseUp={this.OnResizerMouseUp}
-          />
-          <div
-            className="resizer bottom-left"
-            onMouseDown={this.OnResizerMouseDown(E_ResizerType.BOTTOM_LEFT)}
-            onMouseUp={this.OnResizerMouseUp}
-          />
-          <div
-            className="resizer bottom-right"
-            onMouseDown={this.OnResizerMouseDown(E_ResizerType.BOTTOM_RIGHT)}
-            onMouseUp={this.OnResizerMouseUp}
-          />
+          <div className="resizers">
+            <div
+              className="resizer top-left"
+              onMouseDown={this.OnResizerMouseDown(E_ResizerType.TOP_LEFT)}
+              onMouseUp={this.OnResizerMouseUp}
+            />
+            <div
+              className="resizer top-right"
+              onMouseDown={this.OnResizerMouseDown(E_ResizerType.TOP_RIGHT)}
+              onMouseUp={this.OnResizerMouseUp}
+            />
+            <div
+              className="resizer bottom-left"
+              onMouseDown={this.OnResizerMouseDown(E_ResizerType.BOTTOM_LEFT)}
+              onMouseUp={this.OnResizerMouseUp}
+            />
+            <div
+              className="resizer bottom-right"
+              onMouseDown={this.OnResizerMouseDown(E_ResizerType.BOTTOM_RIGHT)}
+              onMouseUp={this.OnResizerMouseUp}
+            />
+          </div>
+          <div className="name">{Name}</div>
         </div>
-        <div className="name">{Name}</div>
       </div>
     );
   }
@@ -150,10 +153,10 @@ class Box extends Component<IProps, IState> {
       switch (ActiveResizer) {
         case E_ResizerType.BOTTOM_RIGHT:
           const { Mouse } = this.props;
-          const MouseX = Mouse.X;
+          const MouseX = Mouse.X - Min.X;
 
           this.setState({
-            Width: MouseX - Min.X
+            Width: MouseX
           });
           break;
       }

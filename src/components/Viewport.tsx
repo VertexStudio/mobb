@@ -27,7 +27,8 @@ class Viewport extends Component<{}, IState> {
   render() {
     const { Mouse } = this.state;
     return (
-      <div>
+      <div style={{ position: "absolute", width: "100vw", height: "100vh" }}>
+        <Box Target Mouse={Mouse} />
         <Box Target Mouse={Mouse} />
       </div>
     );
