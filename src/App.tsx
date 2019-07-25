@@ -1,12 +1,12 @@
 import React from "react";
 import "./App.css";
 
-import Box from "./components/Box";
+import Viewport from "./components/Viewport";
 
 const App: React.FC = () => {
   return (
     <div className="App">
-      <Box Target />
+      <Viewport />
     </div>
   );
 };

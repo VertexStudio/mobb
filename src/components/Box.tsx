@@ -3,7 +3,16 @@ import "./Box.css";
 import Vector2D from "../models/Vector2D";
 
 interface IProps {
+  Mouse: Vector2D;
   Target?: boolean;
+}
+
+enum E_ResizerType {
+  NONE,
+  TOP_LEFT,
+  TOP_RIGHT,
+  BOTTOM_LEFT,
+  BOTTOM_RIGHT
 }
 
 interface IState {
@@ -12,13 +21,15 @@ interface IState {
   Max: Vector2D;
   Width: number;
   Height: number;
-  IsMouseDown: boolean;
   ShiftX: number;
   ShiftY: number;
+  IsBoxMouseDown: boolean;
+  ActiveResizer: E_ResizerType;
 }
 
 class Box extends Component<IProps, IState> {
   static defaultProps: IProps = {
+    Mouse: new Vector2D(0, 0),
     Target: false
   };
 
@@ -30,15 +41,23 @@ class Box extends Component<IProps, IState> {
       Height: 100,
       Min: Vector2D.ZeroVector,
       Max: new Vector2D(100, 100),
-      IsMouseDown: false,
       ShiftX: 0,
-      ShiftY: 0
+      ShiftY: 0,
+      IsBoxMouseDown: false,
+      ActiveResizer: E_ResizerType.NONE
     };
 
-    this.OnMouseDown = this.OnMouseDown.bind(this);
-    this.OnMouseUp = this.OnMouseUp.bind(this);
-    this.OnMouseMove = this.OnMouseMove.bind(this);
-    this.OnMouseLeave = this.OnMouseLeave.bind(this);
+    this.OnBoxMouseDown = this.OnBoxMouseDown.bind(this);
+    this.OnBoxMouseUp = this.OnBoxMouseUp.bind(this);
+    this.OnResizerMouseDown = this.OnResizerMouseDown.bind(this);
+    this.OnResizerMouseUp = this.OnResizerMouseUp.bind(this);
+  }
+
+  componentDidUpdate(prevProps: IProps) {
+    const { ActiveResizer } = this.state;
+    if (!prevProps.Mouse.IsEqual(this.props.Mouse)) {
+      this.OnBoxMouseMove();
+    }
   }
 
   render() {
@@ -48,59 +67,96 @@ class Box extends Component<IProps, IState> {
       <div
         data-testid="container-box"
         className={`box ${Target ? "target" : ""}`}
-        style={{ width: Width, height: Height, top: Min.Y, left: Min.X }}
+        style={{ width: Width, height: Height, left: Min.X, top: Min.Y }}
       >
         <div
           className="draggable-area"
-          onMouseDown={this.OnMouseDown}
-          onMouseUp={this.OnMouseUp}
-          onMouseMove={this.OnMouseMove}
-          onMouseLeave={this.OnMouseLeave}
+          onMouseDown={this.OnBoxMouseDown}
+          onMouseUp={this.OnBoxMouseUp}
         />
         <div className="resizers">
-          <div className="resizer top-left" />
-          <div className="resizer top-right" />
-          <div className="resizer bottom-left" />
-          <div className="resizer bottom-right" />
+          <div
+            className="resizer top-left"
+            onMouseDown={this.OnResizerMouseDown(E_ResizerType.TOP_LEFT)}
+            onMouseUp={this.OnResizerMouseUp}
+          />
+          <div
+            className="resizer top-right"
+            onMouseDown={this.OnResizerMouseDown(E_ResizerType.TOP_RIGHT)}
+            onMouseUp={this.OnResizerMouseUp}
+          />
+          <div
+            className="resizer bottom-left"
+            onMouseDown={this.OnResizerMouseDown(E_ResizerType.BOTTOM_LEFT)}
+            onMouseUp={this.OnResizerMouseUp}
+          />
+          <div
+            className="resizer bottom-right"
+            onMouseDown={this.OnResizerMouseDown(E_ResizerType.BOTTOM_RIGHT)}
+            onMouseUp={this.OnResizerMouseUp}
+          />
         </div>
         <div className="name">{Name}</div>
       </div>
     );
   }
 
-  OnMouseDown(event: React.MouseEvent) {
+  OnBoxMouseDown() {
     const { Min } = this.state;
-    const MouseShiftX = event.pageX - Min.X;
-    const MouseShiftY = event.pageY - Min.Y;
+    const { Mouse } = this.props;
+
+    const MouseShiftX = Mouse.X - Min.X;
+    const MouseShiftY = Mouse.Y - Min.Y;
 
     this.setState({
-      IsMouseDown: true,
+      IsBoxMouseDown: true,
       ShiftX: MouseShiftX,
       ShiftY: MouseShiftY
     });
   }
 
-  OnMouseUp() {
+  OnBoxMouseUp() {
     this.setState({
-      IsMouseDown: false
+      IsBoxMouseDown: false
     });
   }
 
-  OnMouseLeave() {
-    this.setState({
-      IsMouseDown: false
-    });
-  }
-
-  OnMouseMove(event: React.MouseEvent) {
-    const { IsMouseDown, ShiftX, ShiftY } = this.state;
-    if (IsMouseDown) {
-      const MouseX = event.pageX - ShiftX;
-      const MouseY = event.pageY - ShiftY;
+  OnBoxMouseMove() {
+    const { IsBoxMouseDown, ShiftX, ShiftY } = this.state;
+    const { Mouse } = this.props;
+    if (IsBoxMouseDown) {
+      const MouseX = Mouse.X - ShiftX;
+      const MouseY = Mouse.Y - ShiftY;
 
       this.setState({
         Min: new Vector2D(MouseX, MouseY)
       });
+    }
+  }
+
+  OnResizerMouseDown(Resizer: E_ResizerType) {
+    return () => {
+      this.setState({ ActiveResizer: Resizer });
+    };
+  }
+
+  OnResizerMouseUp() {
+    this.setState({ ActiveResizer: E_ResizerType.NONE });
+  }
+
+  OnResizerMouseMove(ActiveResizer: E_ResizerType) {
+    if (ActiveResizer !== E_ResizerType.NONE) {
+      const { Min } = this.state;
+      switch (ActiveResizer) {
+        case E_ResizerType.BOTTOM_RIGHT:
+          const { Mouse } = this.props;
+          const MouseX = Mouse.X;
+
+          this.setState({
+            Width: MouseX - Min.X
+          });
+          break;
+      }
     }
   }
 }
