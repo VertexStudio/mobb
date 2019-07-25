@@ -20,6 +20,7 @@ RUN apt-get update \
     && echo "deb https://dl.yarnpkg.com/$(lsb_release -is | tr '[:upper:]' '[:lower:]')/ stable main" | tee /etc/apt/sources.list.d/yarn.list \
     && apt-get update \
     && apt-get -y install --no-install-recommends yarn \
+    && apt-get -y install nano \
     #
     # Install eslint globally
     && npm install -g eslint \
