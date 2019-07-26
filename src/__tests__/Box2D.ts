@@ -10,7 +10,7 @@ it("new uninitialized-box", () => {
 });
 
 it("new valid initialized-box", () => {
-  const NewBox = new Box2D("A", new Vector2D(10, 15), new Vector2D(22, 19));
+  const NewBox = new Box2D("A", new Vector2D(10, 15), new Vector2D(22, 19), 0);
 
   expect(NewBox.IsValid).toBe(true);
   expect(NewBox.Min).not.toEqual(Vector2D.ZeroVector);
@@ -18,7 +18,7 @@ it("new valid initialized-box", () => {
 });
 
 it("new invalid initialized-box", () => {
-  const NewBox = new Box2D("A", new Vector2D(10, 15), new Vector2D(7, 14));
+  const NewBox = new Box2D("A", new Vector2D(10, 15), new Vector2D(7, 14), 0);
 
   expect(NewBox.IsValid).toBe(false);
 });
@@ -67,8 +67,8 @@ it("check box validity", () => {
 });
 
 it("overlapping and non-overlapping boxes", () => {
-  const BoxA = new Box2D("A", Vector2D.ZeroVector, new Vector2D(20, 20));
-  const BoxB = new Box2D("B", new Vector2D(5, 6), new Vector2D(20, 20));
+  const BoxA = new Box2D("A", Vector2D.ZeroVector, new Vector2D(20, 20), 0);
+  const BoxB = new Box2D("B", new Vector2D(5, 6), new Vector2D(20, 20), 0);
 
   expect(BoxA.OverlappingAreaWith(BoxB)).toBeGreaterThan(0);
 

@@ -1,19 +1,20 @@
 import React from "react";
 import ReactDOM from "react-dom";
-import { render, fireEvent } from "@testing-library/react";
 
 import Box from "../components/Box";
+import Vector2D from "../models/Vector2D";
 
 it("box renders without crashing", () => {
   const div = document.createElement("div");
-  ReactDOM.render(<Box />, div);
+  ReactDOM.render(
+    <Box
+      Name="A"
+      DistanceFromCameraView={50}
+      Mouse={Vector2D.ZeroVector}
+      OnChange={() => {}}
+      InitMin={Vector2D.ZeroVector}
+    />,
+    div
+  );
   ReactDOM.unmountComponentAtNode(div);
-});
-
-it("box renders target/non-target bg color", () => {
-  const { getByTestId, rerender } = render(<Box />);
-  expect(getByTestId("container-box")).not.toHaveClass("target");
-
-  rerender(<Box Target />);
-  expect(getByTestId("container-box")).toHaveClass("target");
 });

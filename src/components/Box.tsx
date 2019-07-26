@@ -1,12 +1,16 @@
 import React, { Component } from "react";
 import "./Box.css";
+
 import Vector2D from "../models/Vector2D";
+import Box2D from "../models/Box2D";
 
 interface IProps {
   Name: string;
   Mouse: Vector2D;
-  DistanceFromCameraView?: number;
+  DistanceFromCameraView: number;
   Target?: boolean;
+  OnChange: (Box: Box2D) => void;
+  InitMin: Vector2D;
 }
 
 enum E_ResizerType {
@@ -29,20 +33,13 @@ interface IState {
 }
 
 class Box extends Component<IProps, IState> {
-  static defaultProps: IProps = {
-    Name: "A",
-    Mouse: new Vector2D(0, 0),
-    DistanceFromCameraView: 100,
-    Target: false
-  };
-
   constructor(props: IProps) {
     super(props);
     this.state = {
       Width: 100,
       Height: 100,
-      Min: Vector2D.ZeroVector,
-      Max: new Vector2D(100, 100),
+      Min: props.InitMin,
+      Max: new Vector2D(props.InitMin.X + 100, props.InitMin.X + 100),
       ShiftX: 0,
       ShiftY: 0,
       IsBoxMouseDown: false,
@@ -62,6 +59,10 @@ class Box extends Component<IProps, IState> {
         this.OnBoxMouseMove();
       }
       this.OnResizerMouseMove(ActiveResizer);
+
+      const { Min, Max } = this.state;
+      const { OnChange, DistanceFromCameraView, Name } = this.props;
+      OnChange(new Box2D(Name, Min, Max, DistanceFromCameraView));
     }
   }
 

@@ -69,7 +69,7 @@
   user-select: none;
 }
 
-.validity-message {
+/* .validity-message {
   position: absolute;
   color: #db0a0a;
   font-size: 0.8em;
@@ -77,4 +77,4 @@
   left: 50%;
   transform: translate(-50%, -50%);
   user-select: none;
-}
+} */

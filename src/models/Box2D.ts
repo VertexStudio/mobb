@@ -8,9 +8,13 @@ class Box2D {
   private _IsValid: boolean;
 
   constructor();
-  constructor(Name: string, Min: Vector2D, Max: Vector2D);
-  constructor(Name?: any, Min?: any, Max?: any) {
-    this._DistanceFromCameraView = 0;
+  constructor(
+    Name: string,
+    Min: Vector2D,
+    Max: Vector2D,
+    DistanceFromCameraView: number
+  );
+  constructor(Name?: any, Min?: any, Max?: any, DistanceFromCameraView?: any) {
     this._IsValid = false;
     if (
       typeof Name === "string" &&
@@ -20,12 +24,14 @@ class Box2D {
       this._Name = Name;
       this._Min = Min;
       this._Max = Max;
+      this._DistanceFromCameraView = DistanceFromCameraView;
       this.SetBoxValidity();
     } else {
       this._Name = `${Date.now()}`;
       this._Min = Vector2D.ZeroVector;
       this._Max = Vector2D.ZeroVector;
       this._IsValid = false;
+      this._DistanceFromCameraView = 0;
     }
   }
 
