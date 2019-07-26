@@ -39,7 +39,7 @@ class Box extends Component<IProps, IState> {
       Width: 100,
       Height: 100,
       Min: props.InitMin,
-      Max: new Vector2D(props.InitMin.X + 100, props.InitMin.X + 100),
+      Max: new Vector2D(props.InitMin.X + 100, props.InitMin.Y + 100),
       ShiftX: 0,
       ShiftY: 0,
       IsBoxMouseDown: false,

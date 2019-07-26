@@ -6,6 +6,10 @@ class Box2D {
   private _Min: Vector2D;
   private _Max: Vector2D;
   private _IsValid: boolean;
+  private _TruncationPercentage: number;
+  private _OcclusionPercentage: number;
+  private _Truncated: boolean;
+  private _Occluded: boolean;
 
   constructor();
   constructor(
@@ -15,6 +19,10 @@ class Box2D {
     DistanceFromCameraView: number
   );
   constructor(Name?: any, Min?: any, Max?: any, DistanceFromCameraView?: any) {
+    this._TruncationPercentage = 0;
+    this._OcclusionPercentage = 0;
+    this._Truncated = false;
+    this._Occluded = false;
     this._IsValid = false;
     if (
       typeof Name === "string" &&
@@ -41,6 +49,38 @@ class Box2D {
 
   public get DistanceFromCameraView(): number {
     return this._DistanceFromCameraView;
+  }
+
+  public get TruncationPercentage(): number {
+    return this._TruncationPercentage;
+  }
+
+  public get OcclusionPercentage(): number {
+    return this._OcclusionPercentage;
+  }
+
+  public get Truncated(): boolean {
+    return this._Truncated;
+  }
+
+  public get Occluded(): boolean {
+    return this._Occluded;
+  }
+
+  public set TruncationPercentage(v: number) {
+    this._TruncationPercentage = v;
+  }
+
+  public set OcclusionPercentage(v: number) {
+    this._OcclusionPercentage = v;
+  }
+
+  public set Truncated(v: boolean) {
+    this._Truncated = v;
+  }
+
+  public set Occluded(v: boolean) {
+    this._Occluded = v;
   }
 
   public get Min(): Vector2D {
@@ -105,6 +145,20 @@ class Box2D {
     }
 
     return 0;
+  }
+
+  GetArea(): number {
+    const Width = this._Max.X - this._Min.X;
+    const Height = this._Max.Y - this._Min.Y;
+    return Width * Height;
+  }
+
+  Intersect(Box: Box2D): boolean {
+    throw "Needs implementation";
+  }
+
+  IsInside(Box: Box2D): boolean {
+    throw "Needs implementation";
   }
 }
 
