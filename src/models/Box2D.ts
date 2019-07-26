@@ -134,11 +134,11 @@ class Box2D {
    * Calcs overlapping area with the given box.
    * @param Box to check against
    */
-  OverlappingAreaWith(Box: Box2D): number {
+  OverlappingAreaWith(Other: Box2D): number {
     const IntersectionX =
-      Math.min(this._Max.X, Box._Max.X) - Math.max(this._Min.X, Box.Min.X);
+      Math.min(this._Max.X, Other._Max.X) - Math.max(this._Min.X, Other.Min.X);
     const IntersectionY =
-      Math.min(this._Max.Y, Box.Max.Y) - Math.max(this._Min.Y, Box._Min.Y);
+      Math.min(this._Max.Y, Other.Max.Y) - Math.max(this._Min.Y, Other._Min.Y);
 
     if (IntersectionX >= 0 && IntersectionY >= 0) {
       return IntersectionX * IntersectionY;
@@ -147,18 +147,56 @@ class Box2D {
     return 0;
   }
 
+  /**
+   * Gets the box area.
+   */
   GetArea(): number {
     const Width = this._Max.X - this._Min.X;
     const Height = this._Max.Y - this._Min.Y;
     return Width * Height;
   }
 
-  Intersect(Box: Box2D): boolean {
-    throw "Needs implementation";
+  /**
+   * Checks whether the given point is inside this box.
+   *
+   * @param Point The point to test.
+   * @return true if the point is inside this box, otherwise false.
+   */
+  IsPointInside(TestPoint: Vector2D): boolean {
+    return (
+      TestPoint.X > this._Min.X &&
+      TestPoint.X < this._Max.X &&
+      TestPoint.Y > this._Min.Y &&
+      TestPoint.Y < this._Max.Y
+    );
   }
 
-  IsInside(Box: Box2D): boolean {
-    throw "Needs implementation";
+  /**
+   * Checks whether the given box intersects this box.
+   *
+   * @param other bounding box to test intersection
+   * @return true if boxes intersect, false otherwise.
+   */
+  Intersect(Other: Box2D): boolean {
+    if (this._Min.X > Other.Max.X || Other.Min.X > this._Max.X) {
+      return false;
+    }
+
+    if (this._Min.Y > Other.Max.Y || Other.Min.Y > this._Max.Y) {
+      return false;
+    }
+
+    return true;
+  }
+
+  /**
+   * Checks whether the given box is fully encapsulated by this box.
+   *
+   * @param Other The box to test for encapsulation within the bounding volume.
+   * @return true if box is inside this volume, false otherwise.
+   */
+  IsInside(Other: Box2D): boolean {
+    return this.IsPointInside(Other.Min) && this.IsPointInside(Other.Max);
   }
 }
 
