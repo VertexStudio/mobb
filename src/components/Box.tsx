@@ -67,8 +67,11 @@ class Box extends Component<IProps, IState> {
   }
 
   render() {
-    const { Width, Height, Min } = this.state;
+    const { Width, Height, Min, IsBoxMouseDown } = this.state;
     const { Name, Target, DistanceFromCameraView } = this.props;
+    const Elevation = IsBoxMouseDown
+      ? DistanceFromCameraView + 10000
+      : DistanceFromCameraView;
     return (
       <div style={{ position: "absolute", width: "100vw", height: "100vh" }}>
         <div
@@ -78,31 +81,31 @@ class Box extends Component<IProps, IState> {
         >
           <div
             className="draggable-area"
-            style={{ zIndex: DistanceFromCameraView }}
+            style={{ zIndex: Elevation }}
             onMouseDown={this.OnBoxMouseDown}
             onMouseUp={this.OnBoxMouseUp}
           />
           <div className="resizers">
             <div
-              style={{ zIndex: DistanceFromCameraView! + 1 }}
+              style={{ zIndex: 10000 }}
               className="resizer top-left"
               onMouseDown={this.OnResizerMouseDown(E_ResizerType.TOP_LEFT)}
               onMouseUp={this.OnResizerMouseUp}
             />
             <div
-              style={{ zIndex: DistanceFromCameraView! + 1 }}
+              style={{ zIndex: 10000 }}
               className="resizer top-right"
               onMouseDown={this.OnResizerMouseDown(E_ResizerType.TOP_RIGHT)}
               onMouseUp={this.OnResizerMouseUp}
             />
             <div
-              style={{ zIndex: DistanceFromCameraView! + 1 }}
+              style={{ zIndex: 10000 }}
               className="resizer bottom-left"
               onMouseDown={this.OnResizerMouseDown(E_ResizerType.BOTTOM_LEFT)}
               onMouseUp={this.OnResizerMouseUp}
             />
             <div
-              style={{ zIndex: DistanceFromCameraView! + 1 }}
+              style={{ zIndex: 10000 }}
               className="resizer bottom-right"
               onMouseDown={this.OnResizerMouseDown(E_ResizerType.BOTTOM_RIGHT)}
               onMouseUp={this.OnResizerMouseUp}

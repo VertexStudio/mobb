@@ -148,7 +148,7 @@ class Box2D {
   }
 
   /**
-   * Gets the box area.
+   * Gets this box area.
    */
   GetArea(): number {
     const Width = this._Max.X - this._Min.X;
