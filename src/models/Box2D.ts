@@ -147,6 +147,18 @@ class Box2D {
     return 0;
   }
 
+  GetOverlappingBoxWith(Other: Box2D): Box2D {
+    const Min: Vector2D = new Vector2D(
+      Math.max(this._Min.X, Other.Min.X),
+      Math.max(this._Min.Y, Other.Min.Y)
+    );
+    const Max: Vector2D = new Vector2D(
+      Math.min(this._Max.X, Other._Max.X),
+      Math.max(this._Max.Y, Other.Max.Y)
+    );
+    return new Box2D("Overlapping", Min, Max, 0);
+  }
+
   /**
    * Gets this box area.
    */
