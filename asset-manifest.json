@@ -1,0 +1,15 @@
+{
+  "files": {
+    "main.css": "/mobb/static/css/main.7f8e4208.chunk.css",
+    "main.js": "/mobb/static/js/main.c6b47bbe.chunk.js",
+    "main.js.map": "/mobb/static/js/main.c6b47bbe.chunk.js.map",
+    "runtime~main.js": "/mobb/static/js/runtime~main.458d20e2.js",
+    "runtime~main.js.map": "/mobb/static/js/runtime~main.458d20e2.js.map",
+    "static/js/2.1ddabbbf.chunk.js": "/mobb/static/js/2.1ddabbbf.chunk.js",
+    "static/js/2.1ddabbbf.chunk.js.map": "/mobb/static/js/2.1ddabbbf.chunk.js.map",
+    "index.html": "/mobb/index.html",
+    "precache-manifest.0655a027382247c5a18c237d682e6237.js": "/mobb/precache-manifest.0655a027382247c5a18c237d682e6237.js",
+    "service-worker.js": "/mobb/service-worker.js",
+    "static/css/main.7f8e4208.chunk.css.map": "/mobb/static/css/main.7f8e4208.chunk.css.map"
+  }
+}
