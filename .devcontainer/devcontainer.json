@@ -6,6 +6,8 @@
   // Uncomment the next line if you want to publish any ports.
   "appPort": ["127.0.0.1:3000:3000"],
 
+  "runArgs": ["-v", "${env:HOME}${env:USERPROFILE}/.ssh:/root/.ssh:ro"],
+
   // Uncomment the next line if you want to add in default container specific settings.json values
   // "settings":  { "workbench.colorTheme": "Quiet Light" },
 
