@@ -67,7 +67,7 @@ class Box extends Component<IProps, IState> {
   }
 
   render() {
-    const { Width, Height, Min, IsBoxMouseDown } = this.state;
+    const { Width, Height, Min, Max, IsBoxMouseDown } = this.state;
     const { Name, Target, DistanceFromCameraView } = this.props;
     const Elevation = IsBoxMouseDown
       ? DistanceFromCameraView + 10000
@@ -87,24 +87,28 @@ class Box extends Component<IProps, IState> {
           />
           <div className="resizers">
             <div
+              title={`(${Min.X}, ${Min.Y})`}
               style={{ zIndex: 10000 }}
               className="resizer top-left"
               onMouseDown={this.OnResizerMouseDown(E_ResizerType.TOP_LEFT)}
               onMouseUp={this.OnResizerMouseUp}
             />
             <div
+              title={`(${Max.X}, ${Min.Y})`}
               style={{ zIndex: 10000 }}
               className="resizer top-right"
               onMouseDown={this.OnResizerMouseDown(E_ResizerType.TOP_RIGHT)}
               onMouseUp={this.OnResizerMouseUp}
             />
             <div
+              title={`(${Min.X}, ${Max.Y})`}
               style={{ zIndex: 10000 }}
               className="resizer bottom-left"
               onMouseDown={this.OnResizerMouseDown(E_ResizerType.BOTTOM_LEFT)}
               onMouseUp={this.OnResizerMouseUp}
             />
             <div
+              title={`(${Max.X}, ${Max.Y})`}
               style={{ zIndex: 10000 }}
               className="resizer bottom-right"
               onMouseDown={this.OnResizerMouseDown(E_ResizerType.BOTTOM_RIGHT)}

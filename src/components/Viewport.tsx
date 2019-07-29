@@ -71,6 +71,7 @@ class Viewport extends Component<{}, IState> {
                       <input
                         type="number"
                         width="100"
+                        step={0.01}
                         max="1"
                         min="0"
                         onChange={this.OnTruncationChange}
@@ -84,9 +85,10 @@ class Viewport extends Component<{}, IState> {
                       <input
                         type="number"
                         width="100"
+                        step={0.01}
                         max="1"
                         min="0"
-                        onChange={() => {}}
+                        onChange={this.OnOcclusionChange}
                         value={OcclusionThreshold}
                       />
                     </td>
@@ -239,22 +241,49 @@ class Viewport extends Component<{}, IState> {
     }
 
     OverlappingBoxes.forEach((Occluders, Index) => {
-      let DuplicatedArea = 0;
-
-      Occluders.forEach((Occluder, Index) => {
-        Occluders.forEach((Comparator, CompIndex) => {
-          if (Index !== CompIndex) {
-            DuplicatedArea += Occluder.OverlappingAreaWith(Comparator);
-          }
-        });
-      });
-
-      let TotalOverlappedArea = -DuplicatedArea;
+      let TotalOverlappedArea = 0;
 
       Occluders.forEach(Occluder => {
         TotalOverlappedArea += BoxesInViewport[Index].OverlappingAreaWith(
           Occluder
         );
+      });
+
+      Occluders.forEach(Occluder => {
+        Occluders.forEach((Comparator, CompIndex) => {
+          if (
+            Occluder.Name !== Comparator.Name &&
+            CompIndex < Occluders.length - 1
+          ) {
+            const Result = Comparator.GetIntersectionBox(
+              Occluders[CompIndex + 1]
+            );
+
+            // Clamp intersection box
+            if (Result.Min.X < BoxesInViewport[Index].Min.X) {
+              Result.Min.X = BoxesInViewport[Index].Min.X;
+            } else if (Result.Min.X > BoxesInViewport[Index].Max.X) {
+              Result.Min.X = BoxesInViewport[Index].Max.X;
+            }
+            if (Result.Min.Y < BoxesInViewport[Index].Min.Y) {
+              Result.Min.Y = BoxesInViewport[Index].Min.Y;
+            } else if (Result.Min.Y > BoxesInViewport[Index].Max.Y) {
+              Result.Min.Y = BoxesInViewport[Index].Max.Y;
+            }
+            if (Result.Max.X > BoxesInViewport[Index].Max.X) {
+              Result.Max.X = BoxesInViewport[Index].Max.X;
+            } else if (Result.Max.X < BoxesInViewport[Index].Min.X) {
+              Result.Max.X = BoxesInViewport[Index].Min.X;
+            }
+            if (Result.Max.Y > BoxesInViewport[Index].Max.Y) {
+              Result.Max.Y = BoxesInViewport[Index].Max.Y;
+            } else if (Result.Max.Y < BoxesInViewport[Index].Min.Y) {
+              Result.Max.Y = BoxesInViewport[Index].Min.Y;
+            }
+
+            TotalOverlappedArea -= Result.GetArea();
+          }
+        });
       });
 
       // if above the OcclusionThreshold: occluded
