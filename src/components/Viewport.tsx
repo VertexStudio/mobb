@@ -1,4 +1,5 @@
 import React, { Component } from "react";
+import "./Viewport.css";
 import Box from "./Box";
 import Vector2D from "../models/Vector2D";
 import Box2D from "../models/Box2D";
@@ -27,6 +28,8 @@ class Viewport extends Component<{}, IState> {
 
     this.OnMouseMove = this.OnMouseMove.bind(this);
     this.OnBoxChange = this.OnBoxChange.bind(this);
+    this.OnTruncationChange = this.OnTruncationChange.bind(this);
+    this.OnOcclusionChange = this.OnOcclusionChange.bind(this);
   }
 
   componentDidMount() {
@@ -55,18 +58,41 @@ class Viewport extends Component<{}, IState> {
     const C_InitMin = new Vector2D(200, 250);
 
     return (
-      <div style={{ position: "absolute", width: "100vw", height: "100vh" }}>
+      <div className="container">
         {BoxesInViewport.length > 0 ? (
-          <div
-            style={{ position: "absolute", marginLeft: "4px", width: "auto" }}
-          >
-            <span style={{ fontSize: "0.5em", fontWeight: "bold" }}>
-              Thresholds
-            </span>
-            <div style={{ fontSize: "0.4em" }}>
-              Truncation: <strong>{TruncationThreshold}</strong>
-              <br />
-              Occlusion: <strong>{OcclusionThreshold}</strong>
+          <div className="details">
+            <span className="details-title">Thresholds</span>
+            <div className="thresholds">
+              <table>
+                <tbody>
+                  <tr>
+                    <td>Truncation:</td>
+                    <td>
+                      <input
+                        type="number"
+                        width="100"
+                        max="1"
+                        min="0"
+                        onChange={this.OnTruncationChange}
+                        value={TruncationThreshold}
+                      />
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>Occlusion:</td>
+                    <td>
+                      <input
+                        type="number"
+                        width="100"
+                        max="1"
+                        min="0"
+                        onChange={() => {}}
+                        value={OcclusionThreshold}
+                      />
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
             </div>
             <hr style={{ width: "160px", marginLeft: 0 }} />
             {BoxesInViewport.map((Box, Index) => {
@@ -133,6 +159,18 @@ class Viewport extends Component<{}, IState> {
         />
       </div>
     );
+  }
+
+  OnTruncationChange(Event: React.FormEvent<HTMLInputElement>) {
+    this.setState({
+      TruncationThreshold: Number(Event.currentTarget.value)
+    });
+  }
+
+  OnOcclusionChange(Event: React.FormEvent<HTMLInputElement>) {
+    this.setState({
+      OcclusionThreshold: Number(Event.currentTarget.value)
+    });
   }
 
   OnMouseMove(event: MouseEvent) {
