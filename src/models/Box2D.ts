@@ -147,14 +147,26 @@ class Box2D {
     return 0;
   }
 
-  GetOverlappingBoxWith(Other: Box2D): Box2D {
+  /**
+   * Gets the intersection Box.
+   * @param Other box to get intersection.
+   */
+  GetIntersectionBox(Other: Box2D): Box2D {
+    if (!this.Intersect(Other)) {
+      return new Box2D(
+        "No-overlapping",
+        Vector2D.ZeroVector,
+        Vector2D.ZeroVector,
+        0
+      );
+    }
     const Min: Vector2D = new Vector2D(
       Math.max(this._Min.X, Other.Min.X),
       Math.max(this._Min.Y, Other.Min.Y)
     );
     const Max: Vector2D = new Vector2D(
       Math.min(this._Max.X, Other._Max.X),
-      Math.max(this._Max.Y, Other.Max.Y)
+      Math.min(this._Max.Y, Other.Max.Y)
     );
     return new Box2D("Overlapping", Min, Max, 0);
   }

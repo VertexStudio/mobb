@@ -77,12 +77,38 @@ it("overlapping and non-overlapping boxes", () => {
   BoxB.Min = new Vector2D(10, 10);
   BoxB.Max = new Vector2D(30, 30);
 
-  expect(BoxA.OverlappingAreaWith(BoxB)).toBe(0);
+  expect(BoxA.OverlappingAreaWith(BoxB)).toEqual(0);
 
   BoxA.Min = new Vector2D(50, 50);
   BoxA.Max = new Vector2D(60, 60);
   BoxB.Min = new Vector2D(50, 50);
   BoxB.Max = new Vector2D(55, 55);
 
-  expect(BoxA.OverlappingAreaWith(BoxB)).toBe(25);
+  expect(BoxA.OverlappingAreaWith(BoxB)).toEqual(25);
+
+  BoxA.Min = new Vector2D(0, 0);
+  BoxA.Max = new Vector2D(10, 10);
+  BoxB.Min = new Vector2D(5, 5);
+  BoxB.Max = new Vector2D(15, 15);
+
+  expect(BoxA.OverlappingAreaWith(BoxB)).toEqual(25);
+});
+
+it("get overlapping 2D box", () => {
+  const BoxA = new Box2D("A", Vector2D.ZeroVector, new Vector2D(10, 10), 0);
+  const BoxB = new Box2D("B", new Vector2D(5, 5), new Vector2D(15, 15), 0);
+
+  let Result = BoxA.GetIntersectionBox(BoxB);
+
+  expect(Result.Min.IsEqual(new Vector2D(5, 5))).toBe(true);
+  expect(Result.Max.IsEqual(new Vector2D(10, 10))).toBe(true);
+  expect(Result.GetArea()).toEqual(25);
+
+  const BoxC = new Box2D("C", new Vector2D(10, 0), new Vector2D(20, 10), 0);
+
+  Result = BoxB.GetIntersectionBox(BoxC);
+
+  expect(Result.Min.IsEqual(new Vector2D(10, 5))).toBe(true);
+  expect(Result.Max.IsEqual(new Vector2D(15, 10))).toBe(true);
+  expect(Result.GetArea()).toEqual(25);
 });
