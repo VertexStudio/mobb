@@ -21,7 +21,7 @@ class Viewport extends Component<{}, IState> {
     this.state = {
       Mouse: Vector2D.ZeroVector,
       TruncationThreshold: 0.15,
-      OcclusionThreshold: 0.95,
+      OcclusionThreshold: 0.75,
       Boxes: {},
       BoxesInViewport: []
     };
@@ -241,71 +241,78 @@ class Viewport extends Component<{}, IState> {
     }
 
     OverlappingBoxes.forEach((Occluders, Index) => {
-      let TotalOverlappedArea = 0;
+      if (!BoxesInViewport[Index].Occluded) {
+        let TotalOverlappedArea = 0;
 
-      Occluders.forEach(Occluder => {
-        TotalOverlappedArea += BoxesInViewport[Index].OverlappingAreaWith(
-          Occluder
-        );
-      });
-
-      Occluders.forEach(Occluder => {
-        Occluders.forEach((Comparator, CompIndex) => {
-          if (
-            Occluder.Name !== Comparator.Name &&
-            CompIndex < Occluders.length - 1
-          ) {
-            const Result = Comparator.GetIntersectionBox(
-              Occluders[CompIndex + 1]
-            );
-
-            // Clamp intersection box
-            if (Result.Min.X < BoxesInViewport[Index].Min.X) {
-              Result.Min.X = BoxesInViewport[Index].Min.X;
-            } else if (Result.Min.X > BoxesInViewport[Index].Max.X) {
-              Result.Min.X = BoxesInViewport[Index].Max.X;
-            }
-            if (Result.Min.Y < BoxesInViewport[Index].Min.Y) {
-              Result.Min.Y = BoxesInViewport[Index].Min.Y;
-            } else if (Result.Min.Y > BoxesInViewport[Index].Max.Y) {
-              Result.Min.Y = BoxesInViewport[Index].Max.Y;
-            }
-            if (Result.Max.X > BoxesInViewport[Index].Max.X) {
-              Result.Max.X = BoxesInViewport[Index].Max.X;
-            } else if (Result.Max.X < BoxesInViewport[Index].Min.X) {
-              Result.Max.X = BoxesInViewport[Index].Min.X;
-            }
-            if (Result.Max.Y > BoxesInViewport[Index].Max.Y) {
-              Result.Max.Y = BoxesInViewport[Index].Max.Y;
-            } else if (Result.Max.Y < BoxesInViewport[Index].Min.Y) {
-              Result.Max.Y = BoxesInViewport[Index].Min.Y;
-            }
-
-            TotalOverlappedArea -= Result.GetArea();
-          }
+        Occluders.forEach(Occluder => {
+          TotalOverlappedArea += BoxesInViewport[Index].OverlappingAreaWith(
+            Occluder
+          );
         });
-      });
 
-      // if above the OcclusionThreshold: occluded
-      if (
-        TotalOverlappedArea / BoxesInViewport[Index].GetArea() >=
-        OcclusionThreshold
-      ) {
-        BoxesInViewport[Index].Occluded = true;
-        BoxesInViewport[Index].Truncated = true;
+        Occluders.forEach(Occluder => {
+          Occluders.forEach((Comparator, CompIndex) => {
+            if (
+              Occluder.Name !== Comparator.Name &&
+              CompIndex < Occluders.length - 1
+            ) {
+              const Result = Comparator.GetIntersectionBox(
+                Occluders[CompIndex + 1]
+              );
+
+              // Clamp intersection box
+              if (Result.Min.X < BoxesInViewport[Index].Min.X) {
+                Result.Min.X = BoxesInViewport[Index].Min.X;
+              } else if (Result.Min.X > BoxesInViewport[Index].Max.X) {
+                Result.Min.X = BoxesInViewport[Index].Max.X;
+              }
+              if (Result.Min.Y < BoxesInViewport[Index].Min.Y) {
+                Result.Min.Y = BoxesInViewport[Index].Min.Y;
+              } else if (Result.Min.Y > BoxesInViewport[Index].Max.Y) {
+                Result.Min.Y = BoxesInViewport[Index].Max.Y;
+              }
+              if (Result.Max.X > BoxesInViewport[Index].Max.X) {
+                Result.Max.X = BoxesInViewport[Index].Max.X;
+              } else if (Result.Max.X < BoxesInViewport[Index].Min.X) {
+                Result.Max.X = BoxesInViewport[Index].Min.X;
+              }
+              if (Result.Max.Y > BoxesInViewport[Index].Max.Y) {
+                Result.Max.Y = BoxesInViewport[Index].Max.Y;
+              } else if (Result.Max.Y < BoxesInViewport[Index].Min.Y) {
+                Result.Max.Y = BoxesInViewport[Index].Min.Y;
+              }
+
+              TotalOverlappedArea -= Result.GetArea();
+            }
+          });
+        });
+
         BoxesInViewport[Index].OcclusionPercentage =
           TotalOverlappedArea / BoxesInViewport[Index].GetArea();
         BoxesInViewport[Index].TruncationPercentage =
           TotalOverlappedArea / BoxesInViewport[Index].GetArea();
-      }
-      // if above the TruncationThreshold: truncated
-      else if (
-        TotalOverlappedArea / BoxesInViewport[Index].GetArea() >=
-        TruncationThreshold
-      ) {
-        BoxesInViewport[Index].Truncated = true;
-        BoxesInViewport[Index].TruncationPercentage =
-          TotalOverlappedArea / BoxesInViewport[Index].GetArea();
+
+        // if above the OcclusionThreshold: occluded
+        if (
+          TotalOverlappedArea / BoxesInViewport[Index].GetArea() >=
+          OcclusionThreshold
+        ) {
+          BoxesInViewport[Index].Occluded = true;
+          BoxesInViewport[Index].Truncated = true;
+          BoxesInViewport[Index].OcclusionPercentage =
+            TotalOverlappedArea / BoxesInViewport[Index].GetArea();
+          BoxesInViewport[Index].TruncationPercentage =
+            TotalOverlappedArea / BoxesInViewport[Index].GetArea();
+        }
+        // if above the TruncationThreshold: truncated
+        else if (
+          TotalOverlappedArea / BoxesInViewport[Index].GetArea() >=
+          TruncationThreshold
+        ) {
+          BoxesInViewport[Index].Truncated = true;
+          BoxesInViewport[Index].TruncationPercentage =
+            TotalOverlappedArea / BoxesInViewport[Index].GetArea();
+        }
       }
     });
 
