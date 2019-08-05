@@ -14,12 +14,12 @@ type GenericFunction<R = any> = (...args: any) => R;
  * @param fn function, accepting any number of arguments, to debounce.
  */
 export const debounce: <R>(
-    ms: number,
-    fn: GenericFunction<R>
-  ) => (...args: any) => void = (ms = 500, fn) => {
-    let inDebounce: number;
-    return (...params: any) => {
-      window.clearTimeout(inDebounce);
-      inDebounce = window.setTimeout(() => fn.apply(null, params), ms);
-    };
+  ms: number,
+  fn: GenericFunction<R>
+) => (...args: any) => void = (ms = 500, fn) => {
+  let inDebounce: number;
+  return (...params: any) => {
+    window.clearTimeout(inDebounce);
+    inDebounce = window.setTimeout(() => fn.apply(null, params), ms);
   };
+};

@@ -222,6 +222,22 @@ class Box2D {
   IsInside(Other: Box2D): boolean {
     return this.IsPointInside(Other.Min) && this.IsPointInside(Other.Max);
   }
+
+  /**
+   * Returns a clone of this box.
+   *
+   * @param Name of the Box2D clone.
+   * @param DistanceFromCameraView optional distance from camera view
+   */
+
+  Clone(Name: string, DistanceFromCameraView: number = 0): Box2D {
+    return new Box2D(
+      Name,
+      new Vector2D(this._Min.X, this._Min.Y),
+      new Vector2D(this._Max.X, this._Max.Y),
+      DistanceFromCameraView
+    );
+  }
 }
 
 export default Box2D;

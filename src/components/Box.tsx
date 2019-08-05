@@ -77,7 +77,13 @@ class Box extends Component<IProps, IState> {
         <div
           data-testid="container-box"
           className={`box ${Target ? "target" : ""}`}
-          style={{ width: Width, height: Height, left: Min.X, top: Min.Y }}
+          style={{
+            width: Width,
+            height: Height,
+            left: Min.X,
+            top: Min.Y,
+            zIndex: Elevation
+          }}
         >
           <div
             className="draggable-area"

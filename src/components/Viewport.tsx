@@ -16,8 +16,17 @@ interface IState {
 }
 
 class Viewport extends Component<{}, IState> {
+  Frame: Box2D;
+
   constructor(props: {}) {
     super(props);
+    // Frame => Min(350, 100), Max(1250, 700)
+    this.Frame = new Box2D(
+      "Frame",
+      new Vector2D(350, 100),
+      new Vector2D(1250, 700),
+      0
+    );
     this.state = {
       Mouse: Vector2D.ZeroVector,
       TruncationThreshold: 0.15,
@@ -60,7 +69,7 @@ class Viewport extends Component<{}, IState> {
     return (
       <div className="container">
         {BoxesInViewport.length > 0 ? (
-          <div className="details">
+          <div className="details" style={{ zIndex: 5 }}>
             <span className="details-title">Thresholds</span>
             <div className="thresholds">
               <table>
@@ -100,7 +109,10 @@ class Viewport extends Component<{}, IState> {
             {BoxesInViewport.map((Box, Index) => {
               return (
                 <div
-                  style={{ fontSize: "0.4em", marginBottom: "4px" }}
+                  style={{
+                    fontSize: "0.4em",
+                    marginBottom: "4px"
+                  }}
                   key={Index}
                 >
                   <span style={{ fontWeight: "bold" }}>{Box.Name}</span>: <br />
@@ -136,8 +148,9 @@ class Viewport extends Component<{}, IState> {
             })}
           </div>
         ) : (
-          <div>Loading...</div>
+          <div style={{ position: "absolute" }}>Loading...</div>
         )}
+        <div className="frame" />
         <Box
           Name="A"
           Mouse={Mouse}
@@ -197,124 +210,161 @@ class Viewport extends Component<{}, IState> {
     const BoxesInViewport = Names.map(Name => Boxes[Name]);
     const OverlappingBoxes: Array<Box2D[]> = [];
 
-    for (let i = 0; i < BoxesInViewport.length; i++) {
-      OverlappingBoxes[i] = [];
-      for (let j = 0; j < BoxesInViewport.length; j++) {
-        // avoid comparing with itself
-        if (i === j) {
-          continue;
-        }
+    // Check for truncations
+    for (let Index = 0; Index < BoxesInViewport.length; Index++) {
+      const CurrentBox = BoxesInViewport[Index];
+      // Area before clampping
+      const OriginalArea = CurrentBox.GetArea();
+      const Clone = CurrentBox.Clone(`Clone of ${CurrentBox.Name}`);
 
-        // intersects?
-        if (BoxesInViewport[i].Intersect(BoxesInViewport[j])) {
-          const IsBehind =
-            BoxesInViewport[i].DistanceFromCameraView >
-            BoxesInViewport[j].DistanceFromCameraView;
+      if (Clone.Min.X < this.Frame.Min.X) {
+        Clone.Min.X = this.Frame.Min.X;
+      } else if (Clone.Min.X > this.Frame.Max.X) {
+        Clone.Min.X = this.Frame.Max.X;
+      }
+      if (Clone.Min.Y < this.Frame.Min.Y) {
+        Clone.Min.Y = this.Frame.Min.Y;
+      } else if (Clone.Min.Y > this.Frame.Max.Y) {
+        Clone.Min.Y = this.Frame.Max.Y;
+      }
+      if (Clone.Max.X > this.Frame.Max.X) {
+        Clone.Max.X = this.Frame.Max.X;
+      } else if (Clone.Max.X < this.Frame.Min.X) {
+        Clone.Max.X = this.Frame.Min.X;
+      }
+      if (Clone.Max.Y > this.Frame.Max.Y) {
+        Clone.Max.Y = this.Frame.Max.Y;
+      } else if (Clone.Max.Y < this.Frame.Min.Y) {
+        Clone.Max.Y = this.Frame.Min.Y;
+      }
 
-          // is comparison box completely inside?
-          if (BoxesInViewport[i].IsInside(BoxesInViewport[j])) {
-            // is comparison box behind?
-            if (!IsBehind) {
-              continue;
-            }
-          }
+      const TruncatedArea = OriginalArea - Clone.GetArea();
+      const TruncatedAreaPercentage = TruncatedArea / OriginalArea;
 
-          // is completely inside?
-          if (BoxesInViewport[j].IsInside(BoxesInViewport[i])) {
-            // is behind?
-            if (IsBehind) {
-              BoxesInViewport[i].Occluded = true;
-              BoxesInViewport[i].Truncated = true;
-              BoxesInViewport[i].OcclusionPercentage = 1.0;
-              BoxesInViewport[i].TruncationPercentage = 1.0;
-            }
-          }
-          // what percentage do they intersect?
-          else {
-            // is behind?
-            if (IsBehind) {
-              OverlappingBoxes[i].push(BoxesInViewport[j]);
-            }
-          }
-        }
+      if (TruncatedAreaPercentage >= TruncationThreshold) {
+        CurrentBox.Truncated = true;
+        CurrentBox.TruncationPercentage = TruncatedArea / OriginalArea;
       }
     }
 
-    OverlappingBoxes.forEach((Occluders, Index) => {
-      if (!BoxesInViewport[Index].Occluded) {
-        let TotalOverlappedArea = 0;
+    // for (let i = 0; i < BoxesInViewport.length; i++) {
+    //   OverlappingBoxes[i] = [];
+    //   for (let j = 0; j < BoxesInViewport.length; j++) {
+    //     // avoid comparing with itself
+    //     if (i === j) {
+    //       continue;
+    //     }
 
-        Occluders.forEach(Occluder => {
-          TotalOverlappedArea += BoxesInViewport[Index].OverlappingAreaWith(
-            Occluder
-          );
-        });
+    //     // intersects?
+    //     if (BoxesInViewport[i].Intersect(BoxesInViewport[j])) {
+    //       const IsBehind =
+    //         BoxesInViewport[i].DistanceFromCameraView >
+    //         BoxesInViewport[j].DistanceFromCameraView;
 
-        Occluders.forEach(Occluder => {
-          Occluders.forEach((Comparator, CompIndex) => {
-            if (
-              Occluder.Name !== Comparator.Name &&
-              CompIndex < Occluders.length - 1
-            ) {
-              const Result = Comparator.GetIntersectionBox(
-                Occluders[CompIndex + 1]
-              );
+    //       // is comparison box completely inside?
+    //       if (BoxesInViewport[i].IsInside(BoxesInViewport[j])) {
+    //         // is comparison box behind?
+    //         if (!IsBehind) {
+    //           continue;
+    //         }
+    //       }
 
-              // Clamp intersection box
-              if (Result.Min.X < BoxesInViewport[Index].Min.X) {
-                Result.Min.X = BoxesInViewport[Index].Min.X;
-              } else if (Result.Min.X > BoxesInViewport[Index].Max.X) {
-                Result.Min.X = BoxesInViewport[Index].Max.X;
-              }
-              if (Result.Min.Y < BoxesInViewport[Index].Min.Y) {
-                Result.Min.Y = BoxesInViewport[Index].Min.Y;
-              } else if (Result.Min.Y > BoxesInViewport[Index].Max.Y) {
-                Result.Min.Y = BoxesInViewport[Index].Max.Y;
-              }
-              if (Result.Max.X > BoxesInViewport[Index].Max.X) {
-                Result.Max.X = BoxesInViewport[Index].Max.X;
-              } else if (Result.Max.X < BoxesInViewport[Index].Min.X) {
-                Result.Max.X = BoxesInViewport[Index].Min.X;
-              }
-              if (Result.Max.Y > BoxesInViewport[Index].Max.Y) {
-                Result.Max.Y = BoxesInViewport[Index].Max.Y;
-              } else if (Result.Max.Y < BoxesInViewport[Index].Min.Y) {
-                Result.Max.Y = BoxesInViewport[Index].Min.Y;
-              }
+    //       // is completely inside?
+    //       if (BoxesInViewport[j].IsInside(BoxesInViewport[i])) {
+    //         // is behind?
+    //         if (IsBehind) {
+    //           BoxesInViewport[i].Occluded = true;
+    //           BoxesInViewport[i].Truncated = true;
+    //           BoxesInViewport[i].OcclusionPercentage = 1.0;
+    //           BoxesInViewport[i].TruncationPercentage = 1.0;
+    //         }
+    //       }
+    //       // what percentage do they intersect?
+    //       else {
+    //         // is behind?
+    //         if (IsBehind) {
+    //           OverlappingBoxes[i].push(BoxesInViewport[j]);
+    //         }
+    //       }
+    //     }
+    //   }
+    // }
 
-              TotalOverlappedArea -= Result.GetArea();
-            }
-          });
-        });
+    // OverlappingBoxes.forEach((Occluders, Index) => {
+    //   if (!BoxesInViewport[Index].Occluded) {
+    //     let TotalOverlappedArea = 0;
 
-        BoxesInViewport[Index].OcclusionPercentage =
-          TotalOverlappedArea / BoxesInViewport[Index].GetArea();
-        BoxesInViewport[Index].TruncationPercentage =
-          TotalOverlappedArea / BoxesInViewport[Index].GetArea();
+    //     Occluders.forEach(Occluder => {
+    //       TotalOverlappedArea += BoxesInViewport[Index].OverlappingAreaWith(
+    //         Occluder
+    //       );
+    //     });
 
-        // if above the OcclusionThreshold: occluded
-        if (
-          TotalOverlappedArea / BoxesInViewport[Index].GetArea() >=
-          OcclusionThreshold
-        ) {
-          BoxesInViewport[Index].Occluded = true;
-          BoxesInViewport[Index].Truncated = true;
-          BoxesInViewport[Index].OcclusionPercentage =
-            TotalOverlappedArea / BoxesInViewport[Index].GetArea();
-          BoxesInViewport[Index].TruncationPercentage =
-            TotalOverlappedArea / BoxesInViewport[Index].GetArea();
-        }
-        // if above the TruncationThreshold: truncated
-        else if (
-          TotalOverlappedArea / BoxesInViewport[Index].GetArea() >=
-          TruncationThreshold
-        ) {
-          BoxesInViewport[Index].Truncated = true;
-          BoxesInViewport[Index].TruncationPercentage =
-            TotalOverlappedArea / BoxesInViewport[Index].GetArea();
-        }
-      }
-    });
+    //     Occluders.forEach(Occluder => {
+    //       Occluders.forEach((Comparator, CompIndex) => {
+    //         if (
+    //           Occluder.Name !== Comparator.Name &&
+    //           CompIndex < Occluders.length - 1
+    //         ) {
+    //           const Result = Comparator.GetIntersectionBox(
+    //             Occluders[CompIndex + 1]
+    //           );
+
+    //           // Clamp intersection box
+    //           if (Result.Min.X < BoxesInViewport[Index].Min.X) {
+    //             Result.Min.X = BoxesInViewport[Index].Min.X;
+    //           } else if (Result.Min.X > BoxesInViewport[Index].Max.X) {
+    //             Result.Min.X = BoxesInViewport[Index].Max.X;
+    //           }
+    //           if (Result.Min.Y < BoxesInViewport[Index].Min.Y) {
+    //             Result.Min.Y = BoxesInViewport[Index].Min.Y;
+    //           } else if (Result.Min.Y > BoxesInViewport[Index].Max.Y) {
+    //             Result.Min.Y = BoxesInViewport[Index].Max.Y;
+    //           }
+    //           if (Result.Max.X > BoxesInViewport[Index].Max.X) {
+    //             Result.Max.X = BoxesInViewport[Index].Max.X;
+    //           } else if (Result.Max.X < BoxesInViewport[Index].Min.X) {
+    //             Result.Max.X = BoxesInViewport[Index].Min.X;
+    //           }
+    //           if (Result.Max.Y > BoxesInViewport[Index].Max.Y) {
+    //             Result.Max.Y = BoxesInViewport[Index].Max.Y;
+    //           } else if (Result.Max.Y < BoxesInViewport[Index].Min.Y) {
+    //             Result.Max.Y = BoxesInViewport[Index].Min.Y;
+    //           }
+
+    //           TotalOverlappedArea -= Result.GetArea();
+    //         }
+    //       });
+    //     });
+
+    //     BoxesInViewport[Index].OcclusionPercentage =
+    //       TotalOverlappedArea / BoxesInViewport[Index].GetArea();
+    //     BoxesInViewport[Index].TruncationPercentage =
+    //       TotalOverlappedArea / BoxesInViewport[Index].GetArea();
+
+    //     // if above the OcclusionThreshold: occluded
+    //     if (
+    //       TotalOverlappedArea / BoxesInViewport[Index].GetArea() >=
+    //       OcclusionThreshold
+    //     ) {
+    //       BoxesInViewport[Index].Occluded = true;
+    //       BoxesInViewport[Index].Truncated = true;
+    //       BoxesInViewport[Index].OcclusionPercentage =
+    //         TotalOverlappedArea / BoxesInViewport[Index].GetArea();
+    //       BoxesInViewport[Index].TruncationPercentage =
+    //         TotalOverlappedArea / BoxesInViewport[Index].GetArea();
+    //     }
+    //     // if above the TruncationThreshold: truncated
+    //     else if (
+    //       TotalOverlappedArea / BoxesInViewport[Index].GetArea() >=
+    //       TruncationThreshold
+    //     ) {
+    //       BoxesInViewport[Index].Truncated = true;
+    //       BoxesInViewport[Index].TruncationPercentage =
+    //         TotalOverlappedArea / BoxesInViewport[Index].GetArea();
+    //     }
+    //   }
+    // });
 
     this.setState({
       BoxesInViewport
